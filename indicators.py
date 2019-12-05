@@ -1,25 +1,59 @@
-def SMA(df, columnName, length, newColName):
+def sma(values, length, roundLen = 8):
     """
-    Function creates a simple moving average of the columnName column in
-    df for a given length, and adds it back to the df under the name newColName
+    Function creates a simple moving average the values list with length length
 
     Inputs:
-        df(dataframe) - pandas dataframe
-        columnName(string) - name of column in df you would like SMA of
+
+        values(list of float) - values to take moving average of
         length(int) - length of moving average
-        newColName(string) - name of new column in df
+        roundLen(int) - rounds moving average values to this many decimal points (helps
+            with floating point calculation)
     Outputs:
-        none
+        returnValues(list of float) - return list of moving averages
+    Tested: Yes
     """
 
-    colWanted = df[columnName]
-    newCol = []
+    returnValues = []
 
-    for i in range(len(colWanted)):
+    for i in range(len(values)):
         if i < length - 1:
-            newCol.append(0)
+            returnValues.append(0)
         else:
-            currentAvg = sum(colWanted[i-length+1:i+1])/length
-            newCol.append(currentAvg)
+            currentAvg = round(sum(values[i-length+1:i+1])/length, roundLen)
+            returnValues.append(currentAvg)
 
-    df[newColName] = newCol
+    return returnValues
+
+
+def ema(values, length, roundLen = 8, emaMult = 0):
+    """
+    Function creates an exponential moving average the values list with length length
+
+    Inputs:
+
+        values(list of float) - values to take moving average of
+        length(int) - length of moving average
+        roundLen(int) - rounds moving average values to this many decimal points (helps
+            with floating point calculation)
+        emaMult(float) - default 0, if left at default uses 2/(length + 1)
+    Outputs:
+        returnValues(list of float) - return list of moving averages
+    Tested: Yes
+    """
+
+    if emaMult == 0:
+        emaMult = 2/(length + 1)
+
+    returnValues = []
+
+    for i in range(len(values)):
+        if i < length - 1:
+            returnValues.append(0)
+        elif i == length - 1:
+            currentAvg = round(sum(values[i-length+1:i+1])/length, roundLen)
+            returnValues.append(currentAvg)
+        else:
+            currentAvg = round(emaMult*values[i] + (1-emaMult)*returnValues[-1], roundLen)
+            returnValues.append(currentAvg)
+
+    return returnValues
