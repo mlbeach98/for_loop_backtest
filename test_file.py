@@ -4,7 +4,7 @@ import indicators as ind
 
 df = pd.read_csv("AAPL.csv")
 
-vals = ind.sma(df['Adj Close'], 10)
+vals = ind.list_above_value(df['Open'], 199.619995, inclusive=True)
 
 df['vals'] = vals
 
