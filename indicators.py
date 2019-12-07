@@ -92,6 +92,90 @@ def list1_above_list2(values1, values2, inclusive = False):
 
     return returnValues
 
+def list1_cross_list2(values1, values2, currentIncl = False, pastIncl = False, above = True):
+    """
+    This function compares each index of list1 to list2. Given default of above = True,
+        if list1[i] > list2[i] and list1[i-1] < list2[i-1], append 1 to returnValues, else
+        return 0.
+    Inputs:
+        values1(list of floats) - values to check if above
+        values2(list of floats) - values to test against
+        currentIncl(bool) - if true, allow current value equal to be included
+        pastIncl(bool) - if true, allow past value equal to be included
+        above(bool) - if true, look for list1 to cross above list2. If false, look for
+            list2 to cross above list1
+    Outputs:
+        returnValues(binary list) - returns 1 if above, 0 otherwise
+    Tested: Yes
+    """
+
+    returnValues = []
+
+    if len(values1) != len(values2):
+        print("ERROR: lists must be of same length")
+
+    else:
+        for i in range(len(values1)):
+            if i == 0:
+                returnValues.append(0)
+
+            else:
+                if currentIncl == False:
+                    if pastIncl == False:
+                        if above == True:
+                            if values1[i] > values2[i] and values1[i-1] < values2[i-1]:
+                                returnValues.append(1)
+                            else:
+                                returnValues.append(0)
+
+                        else: #above == False
+                            if values1[i] < values2[i] and values1[i-1] > values2[i-1]:
+                                returnValues.append(1)
+                            else:
+                                returnValues.append(0)
+
+                    else: #pastIncl == True
+                        if above == True:
+                            if values1[i] > values2[i] and values1[i-1] <= values2[i-1]:
+                                returnValues.append(1)
+                            else:
+                                returnValues.append(0)
+
+                        else: #above == False
+                            if values1[i] < values2[i] and values1[i-1] >= values2[i-1]:
+                                returnValues.append(1)
+                            else:
+                                returnValues.append(0)
+
+                else: #currentIncl == True
+                    if pastIncl == False:
+                        if above == True:
+                            if values1[i] >= values2[i] and values1[i-1] < values2[i-1]:
+                                returnValues.append(1)
+                            else:
+                                returnValues.append(0)
+
+                        else: #above == False
+                            if values1[i] <= values2[i] and values1[i-1] > values2[i-1]:
+                                returnValues.append(1)
+                            else:
+                                returnValues.append(0)
+
+                    else: #pastIncl == True
+                        if above == True:
+                            if values1[i] >= values2[i] and values1[i-1] <= values2[i-1]:
+                                returnValues.append(1)
+                            else:
+                                returnValues.append(0)
+
+                        else: #above == False
+                            if values1[i] <= values2[i] and values1[i-1] >= values2[i-1]:
+                                returnValues.append(1)
+                            else:
+                                returnValues.append(0)
+
+    return returnValues
+
 def list_above_value(values, static, inclusive = False, flipped = False):
     """
     This function tests each index of values against static, and if the currentAvg
@@ -133,5 +217,25 @@ def list_above_value(values, static, inclusive = False, flipped = False):
                 returnValues.append(1)
             else:
                 returnValues.append(0)
+
+    return returnValues
+
+def percent_change(values):
+    """
+    This function calculates the day over day change in a list
+    Inputs:
+        values(list of float) - list of values to find daily change in
+    Outputs:
+        returnValues(list of float) - percent change from previous observation
+    Tested: No
+    """
+
+    returnValues = []
+
+    for i in range(len(values)):
+        if i == 0:
+            returnValues.append(0)
+        else:
+            returnValues.append((values[i]-values[i-1])/values[i-1])
 
     return returnValues
