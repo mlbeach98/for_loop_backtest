@@ -239,3 +239,80 @@ def percent_change(values):
             returnValues.append((values[i]-values[i-1])/values[i-1])
 
     return returnValues
+
+def increase(values, inverted = False, inclusive = False):
+    """
+    This function tells whether a value has increased from the past observation
+    Inputs:
+        values(list of float) - list of values to check
+        inverted(bool) - if true, test decrease
+        inclusive(bool) - if true, allows same value to return 1
+    Outputs:
+        returnValues(binary list) - returns 1 if obs is greater than last, 0 otherwise
+    Tested: No
+    """
+
+    returnValues = []
+
+    for i in range(len(values)):
+        if i == 0:
+            returnValues.append(0)
+        else:
+            if inclusive == False:
+                if inverted == False:
+                    if values[i] > values[i-1]:
+                        returnValues.append(1)
+                    else:
+                        returnValues.append(0)
+                else: #inverted = True
+                    if values[i] < values[i-1]:
+                        returnValues.append(1)
+                    else:
+                        returnValues.append(0)
+            else: #inclusive = True
+                if inverted == False:
+                    if values[i] >= values[i-1]:
+                        returnValues.append(1)
+                    else:
+                        returnValues.append(0)
+                else: #inverted = True
+                    if values[i] <= values[i-1]:
+                        returnValues.append(1)
+                    else:
+                        returnValues.append(0)
+
+    return returnValues
+
+def product(listOfValues):
+    """
+    This function multiplies the observation at each list for a given index
+    Inputs:
+        listOfValues(list of list of floats) - lists to be multiplied together
+    Outputs:
+        returnValues(list of float) - multiplied values
+    Tested: No
+    """
+
+    if len(listOfValues) < 2:
+        print("Please enter at least two lists")
+
+    else:
+        lengthList = []
+        for i in listOfValues:
+            lengthList.append(len(i))
+
+        if min(lengthList) != max(lengthList):
+            print("All lists must be of same length")
+
+        else:
+            #start actual work here
+            returnValues = []
+            for i in range(len(listOfValues[0])):
+
+                currentVal = 1
+                for list1 in listOfValues:
+                    currentVal *= list1[i]
+
+                returnValues.append(currentVal)
+
+            return returnValues

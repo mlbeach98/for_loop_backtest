@@ -13,7 +13,7 @@ for file in listdir(fileLoc):
         onlyFiles.append(file.split(".")[0])
 
 #tickerList = random.sample(onlyFiles, len(onlyFiles))
-tickerList = random.sample(onlyFiles, 100)
+tickerList = random.sample(onlyFiles, 300)
 
 chdir(fileLoc)
 
@@ -31,17 +31,24 @@ for ticker in tickerList:
 
         #apply indicators
         adjClose = data['Adj Close'].tolist()
+        volume = data['Volume'].tolist()
         dailyReturns = ind.percent_change(adjClose)
         data['dailyReturns'] = dailyReturns
 
         ema9 = ind.ema(adjClose, 9)
         data['ema9'] = ema9
+        ema13 = ind.ema(adjClose, 13)
+        data['ema13'] = ema13
 
         #create signals off indicators
-        buySignal = ind.list1_cross_list2(adjClose, ema9)
+        emaCross = ind.list1_cross_list2(ema9, ema13)
+        data['emaCross'] = emaCross
+        increaseVol = ind.increase(volume)
+        data['increaseVol'] = increaseVol
+        buySignal = ind.product([emaCross, increaseVol])
         data['buySignal'] = buySignal
 
-        sellSignal = ind.list1_cross_list2(adjClose, ema9, above=False)
+        sellSignal = ind.list1_cross_list2(ema13, ema9)
         data['sellSignal'] = sellSignal
 
         #determine trades
