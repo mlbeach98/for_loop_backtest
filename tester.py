@@ -51,6 +51,11 @@ for ticker in tickerList:
         sellLoc = data.columns.get_loc('sellSignal')
 
         for i in range(len(data)):
+
+            if datetime.strptime(data.iloc[i][0], "%Y-%m-%d") > datetime.strptime(cutoffDate, "%m/%d/%Y"):
+                data.drop(data.index[i:], inplace=True)
+                break
+
             if bought == False:
                 if data.iloc[i][buyLoc] == 1:
                     iVal = i
@@ -87,6 +92,20 @@ tradeResults.to_csv("tradeResults.csv")
 
 averageReturn = tradeResults['tradeReturn'].mean()
 averageDaysHeld = tradeResults['daysHeld'].mean()
+individualStockReturns = {}
+returnsList = []
+for ticker in tickerList:
+    indexNames = tradeResults[ tradeResults['symbol'] != ticker ].index
+    tempTradeResults = tradeResults.drop(indexNames)
+    if len(tempTradeResults) > 0:
+        individualStockReturns[ticker] = sum(tempTradeResults['tradeReturn'])/len(tempTradeResults)
+        returnsList.append(sum(tempTradeResults['tradeReturn'])/len(tempTradeResults))
+
+#drop best and worst stock, average rest
+returnsList.remove(max(returnsList))
+returnsList.remove(min(returnsList))
+individualReturns = sum(returnsList)/len(returnsList)
 
 print("Average Return: {}%".format(round(averageReturn * 100.0, 4)))
-print("Average Days Held: {}".format(round(averageDaysHeld,4))
+print("Average Days Held: {}".format(round(averageDaysHeld,4)))
+print("Without outliers: {}%".format(round(individualReturns * 100.0, 4)))
