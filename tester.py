@@ -12,7 +12,8 @@ for file in listdir(fileLoc):
     if isfile(join(fileLoc, file)):
         onlyFiles.append(file.split(".")[0])
 
-tickerList = random.sample(onlyFiles, 10)
+#tickerList = random.sample(onlyFiles, len(onlyFiles))
+tickerList = random.sample(onlyFiles, 100)
 
 chdir(fileLoc)
 
@@ -20,11 +21,13 @@ symbolData = {}
 cutoffDate = "06/01/2015"
 tradeResults = pd.DataFrame(columns = ['symbol', 'buyDate', 'buyPrice', 'sellDate', 'sellPrice', 'daysHeld', 'gainLoss', 'tradeReturn'])
 
+tickerCount = 0
 for ticker in tickerList:
+    tickerCount += 1
+    print("{}/{}: {}".format(tickerCount, len(tickerList), ticker))
     #read in stock_data
     data = pd.read_csv(ticker + ".csv")
     if datetime.strptime(data.iloc[0][0], "%Y-%m-%d") < datetime.strptime(cutoffDate, "%m/%d/%Y"):
-        print("dates good")
 
         #apply indicators
         adjClose = data['Adj Close'].tolist()
@@ -50,14 +53,12 @@ for ticker in tickerList:
         for i in range(len(data)):
             if bought == False:
                 if data.iloc[i][buyLoc] == 1:
-                    print("trade_b")
                     iVal = i
                     buyDate = data.iloc[i][0]
                     buyPrice = data.iloc[i][5]
                     bought = True
             else: #bought == True
                 if data.iloc[i][sellLoc] == 1:
-                    print("trade")
                     sellDate = data.iloc[i][0]
                     sellPrice = data.iloc[i][5]
                     bought = False
@@ -83,3 +84,9 @@ for ticker in tickerList:
 
 chdir(r"C:\Users\mlbea\Documents\GitHub\for_loop_backtest")
 tradeResults.to_csv("tradeResults.csv")
+
+averageReturn = tradeResults['tradeReturn'].mean()
+averageDaysHeld = tradeResults['daysHeld'].mean()
+
+print("Average Return: {}%".format(round(averageReturn * 100.0, 4)))
+print("Average Days Held: {}".format(round(averageDaysHeld,4))
