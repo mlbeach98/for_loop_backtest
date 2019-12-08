@@ -12,8 +12,11 @@ for file in listdir(fileLoc):
     if isfile(join(fileLoc, file)):
         onlyFiles.append(file.split(".")[0])
 
-#tickerList = random.sample(onlyFiles, len(onlyFiles))
-tickerList = random.sample(onlyFiles, 300)
+tickerList = ['AAPL']
+onlyFiles.remove('AAPL')
+
+tickerList = random.sample(onlyFiles, len(onlyFiles))
+#tickerList = random.sample(onlyFiles, 300)
 
 chdir(fileLoc)
 
@@ -27,7 +30,14 @@ for ticker in tickerList:
     print("{}/{}: {}".format(tickerCount, len(tickerList), ticker))
     #read in stock_data
     data = pd.read_csv(ticker + ".csv")
-    if datetime.strptime(data.iloc[0][0], "%Y-%m-%d") < datetime.strptime(cutoffDate, "%m/%d/%Y"):
+    if data.iloc[0][0][-5] == "-":
+        dateFormat = "%m-%d-%Y"
+    elif data.iloc[0][0][-5] == "/":
+        dateFormat = "%m/%d/%Y"
+    elif data.iloc[0][0][-3] == "-":
+        dateFormat = "%Y-%m-%d"
+
+    if datetime.strptime(data.iloc[0][0], dateFormat) < datetime.strptime(cutoffDate, "%m/%d/%Y"):
 
         #apply indicators
         adjClose = data['Adj Close'].tolist()
@@ -59,7 +69,7 @@ for ticker in tickerList:
 
         for i in range(len(data)):
 
-            if datetime.strptime(data.iloc[i][0], "%Y-%m-%d") > datetime.strptime(cutoffDate, "%m/%d/%Y"):
+            if datetime.strptime(data.iloc[i][0], dateFormat) > datetime.strptime(cutoffDate, "%m/%d/%Y"):
                 data.drop(data.index[i:], inplace=True)
                 break
 
