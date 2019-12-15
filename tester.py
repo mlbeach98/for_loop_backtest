@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from os import listdir, chdir
+from os import listdir, chdir, remove
 from os.path import isfile, join
 import random
 import indicators as ind
@@ -8,6 +8,8 @@ from datetime import datetime
 
 onlyFiles = []
 fileLoc = r"C:\Users\mlbea\Documents\GitHub\stock_data"
+resultsLoc = r"C:\Users\mlbea\Documents\GitHub\for_loop_backtest"
+resultsLocWith = r"C:\\Users\\mlbea\\Documents\\GitHub\\for_loop_backtest\\"
 for file in listdir(fileLoc):
     if isfile(join(fileLoc, file)):
         onlyFiles.append(file.split(".")[0])
@@ -16,14 +18,14 @@ tickerList = ['AAPL']
 onlyFiles.remove('AAPL')
 
 tickerList = random.sample(onlyFiles, len(onlyFiles))
-#tickerList = random.sample(onlyFiles, 300)
+#tickerList = random.sample(onlyFiles, 10)
 
 chdir(fileLoc)
 
-symbolData = {}
 cutoffDate = "06/01/2015"
 tradeResults = pd.DataFrame(columns = ['symbol', 'buyDate', 'buyPrice', 'sellDate', 'sellPrice', 'daysHeld', 'gainLoss', 'tradeReturn'])
 
+tradeResultsCount = 0
 tickerCount = 0
 for ticker in tickerList:
     tickerCount += 1
@@ -101,19 +103,39 @@ for ticker in tickerList:
 
                     tradeResults = tradeResults.append(dict1, ignore_index=True)
 
-        #analyze results
-        symbolData[ticker] = data
+                    if len(tradeResults) >= 100000:
+                        chdir(resultsLoc)
+                        tradeResults.to_csv("tradeResultsPartial{}.csv".format(tradeResultsCount))
+                        del tradeResults
+                        tradeResults = pd.DataFrame(columns = ['symbol', 'buyDate', 'buyPrice', 'sellDate', 'sellPrice', 'daysHeld', 'gainLoss', 'tradeReturn'])
+                        chdir(fileLoc)
+                        tradeResultsCount += 1
 
-chdir(r"C:\Users\mlbea\Documents\GitHub\for_loop_backtest")
-tradeResults.to_csv("tradeResults.csv")
+chdir(resultsLoc)
+tradeResults.to_csv("tradeResultsPartial{}.csv".format(tradeResultsCount))
+del tradeResults
+tradeResults = pd.DataFrame(columns = ['symbol', 'buyDate', 'buyPrice', 'sellDate', 'sellPrice', 'daysHeld', 'gainLoss', 'tradeReturn'])
+tradeResultsCount += 1
 
-averageReturn = tradeResults['tradeReturn'].mean()
-averageDaysHeld = tradeResults['daysHeld'].mean()
+tradeResultsFinal = pd.DataFrame(columns = ['symbol', 'buyDate', 'buyPrice', 'sellDate', 'sellPrice', 'daysHeld', 'gainLoss', 'tradeReturn'])
+for i in range(tradeResultsCount):
+    for file in listdir(resultsLoc):
+        if file == "tradeResultsPartial{}.csv".format(i):
+            tempDf = pd.read_csv(file)
+            remove(file)
+
+            tradeResultsFinal = tradeResultsFinal.append(tempDf, ignore_index = True, sort = False)
+
+tradeResultsFinal = tradeResultsFinal.reset_index()
+
+tradeResultsFinal.to_csv("tradeResults.csv")
+
+averageReturn = tradeResultsFinal['tradeReturn'].mean()
+averageDaysHeld = tradeResultsFinal['daysHeld'].mean()
 individualStockReturns = {}
 returnsList = []
 for ticker in tickerList:
-    indexNames = tradeResults[ tradeResults['symbol'] != ticker ].index
-    tempTradeResults = tradeResults.drop(indexNames)
+    tempTradeResults = tradeResultsFinal.drop(tradeResultsFinal[tradeResultsFinal['symbol'] != ticker].index)
     if len(tempTradeResults) > 0:
         individualStockReturns[ticker] = sum(tempTradeResults['tradeReturn'])/len(tempTradeResults)
         returnsList.append(sum(tempTradeResults['tradeReturn'])/len(tempTradeResults))
