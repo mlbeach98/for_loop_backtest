@@ -220,6 +220,95 @@ def list_above_value(values, static, inclusive = False, flipped = False):
 
     return returnValues
 
+def list_cross_above_value(values, static, inclCurrent = False, inclPast = False, flipped = False):
+    """
+    if a list index is above a given value, append 1 to returnValues else append 0
+    """
+
+    returnValues = []
+
+    if inclCurrent == False and inclPast == False and flipped == False:
+        for i in range(len(values)):
+            if i == 0:
+                returnValues.append(0)
+            else:
+                if values[i] > static and values[i-1] < static:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+
+    if inclCurrent == False and inclPast == False and flipped == True:
+        for i in range(len(values)):
+            if i == 0:
+                returnValues.append(0)
+            else:
+                if values[i] < static and values[i-1] > static:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+
+    if inclCurrent == True and inclPast == False and flipped == False:
+        for i in range(len(values)):
+            if i == 0:
+                returnValues.append(0)
+            else:
+                if values[i] >= static and values[i-1] < static:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+
+    if inclCurrent == True and inclPast == False and flipped == True:
+        for i in range(len(values)):
+            if i == 0:
+                returnValues.append(0)
+            else:
+                if values[i] <= static and values[i-1] > static:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+
+    if inclCurrent == False and inclPast == True and flipped == False:
+        for i in range(len(values)):
+            if i == 0:
+                returnValues.append(0)
+            else:
+                if values[i] > static and values[i-1] <= static:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+
+    if inclCurrent == False and inclPast == True and flipped == True:
+        for i in range(len(values)):
+            if i == 0:
+                returnValues.append(0)
+            else:
+                if values[i] < static and values[i-1] >= static:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+
+    if inclCurrent == True and inclPast == True and flipped == False:
+        for i in range(len(values)):
+            if i == 0:
+                returnValues.append(0)
+            else:
+                if values[i] >= static and values[i-1] <= static:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+
+    if inclCurrent == True and inclPast == True and flipped == True:
+        for i in range(len(values)):
+            if i == 0:
+                returnValues.append(0)
+            else:
+                if values[i] <= static and values[i-1] >= static:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+
+    return returnValues
+
 def percent_change(values):
     """
     This function calculates the day over day change in a list
@@ -388,5 +477,40 @@ def rsi(values, rsiLength = 14):
                 RS = avgGain / avgLoss
 
             returnValues.append(100 - (100 / (1 + RS)))
+
+    return returnValues
+
+def lookback(values, lookbackLength, all = False):
+    """
+    This function checks if an observation in the past lookbackLength observations was a 1 in values. If all is set to true, this will only return 1 if all the values are 1.
+    """
+
+    returnValues = []
+
+    if all == False:
+        for i in range(len(values)):
+            if i < lookbackLength - 1:
+                if sum(values[:i+1]) > 0:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+            else: #enough observations
+                if sum(values[i-lookbackLength+1:i+1]) > 0:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+
+    elif all == True:
+        for i in range(len(values)):
+            if i < lookbackLength - 1:
+                if sum(values[:i]) == i + 1:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
+            else: #enough observations
+                if sum(values[i-lookbackLength:i]) == lookbackLength:
+                    returnValues.append(1)
+                else:
+                    returnValues.append(0)
 
     return returnValues

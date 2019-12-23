@@ -4,8 +4,15 @@ import indicators as ind
 
 df = pd.read_csv("AAPL.csv")
 
-vals = ind.list_above_value(df['Open'], 199.619995, inclusive=True)
+adjClose = df['Adj Close'].tolist()
 
-df['vals'] = vals
+rsi = ind.rsi(adjClose)
+df['rsi'] = rsi
+
+rsiCross30 = ind.list_cross_above_value(rsi, 30)
+df['crossAbove30'] = rsiCross30
+
+lookback = ind.lookback(rsiCross30, 10)
+df['lookback10'] = lookback
 
 df.to_csv("value_check.csv")
