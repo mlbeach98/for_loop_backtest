@@ -316,3 +316,77 @@ def product(listOfValues):
                 returnValues.append(currentVal)
 
             return returnValues
+
+def macd_histogram(values, fastLength = 12, slowLength = 26, signalLength = 9):
+    """
+    This function computes a macd of "values" which is made up of the fast ema - slow ema, and then taking the difference between that line and the signalLength ema of the line
+    """
+
+    fastLine = ema(values, fastLength)
+    slowLine = ema(values, slowLength)
+    macdLine = []
+
+    for i in range(len(fastLine)):
+        if slowLine[i] == 0:
+            macdLine.append(0)
+        else:
+            macdLine.append(fastLine[i] - slowLine[i])
+
+    signalLine = ema(macdLine, signalLength)
+    returnValues = []
+
+    for i in range(len(macdLine)):
+        if signalLine == 0:
+            returnValues.append(0)
+        else:
+            returnValues.append(macdLine[i] - signalLine[i])
+
+    return returnValues
+
+def rsi(values, rsiLength = 14):
+    """
+    This function returns the rsi of a given length for "values"
+    """
+
+    dailyChange = percent_change(values)
+
+    initGainList = []
+    initLossList = []
+
+    for i in range(rsiLength):
+        if dailyChange[i] > 0:
+            initGainList.append(abs(dailyChange[i]))
+        elif dailyChange[i] < 0:
+            initLossList.append(abs(dailyChange[i]))
+
+    avgGain = sum(initGainList)/rsiLength
+    avgLoss = sum(initLossList)/rsiLength
+
+    if avgLoss == 0:
+        RS = 1000000000 #just need some non zero large number here
+    else:
+        RS = avgGain / avgLoss
+
+    RSI = 100 - (100 / (1 + RS))
+
+    returnValues = []
+
+    for i in range(len(values)):
+        if i < rsiLength - 1:
+            returnValues.append(0)
+        elif i == rsiLength:
+            returnValues.append(RSI)
+        else:
+            if dailyChange[i] > 0:
+                avgGain = ((avgGain * (rsiLength - 1)) + abs(dailyChange[i])) / rsiLength
+            elif dailyChange[i] < 0:
+                avgLoss = ((avgLoss * (rsiLength - 1)) + abs(dailyChange[i])) / rsiLength
+
+            if avgLoss == 0:
+                RS = 1000000000 #just need some non zero large number here
+            else:
+                RS = avgGain / avgLoss
+
+            returnValues.append(100 - (100 / (1 + RS)))
+
+    return returnValues
