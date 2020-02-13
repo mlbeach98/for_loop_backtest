@@ -42,6 +42,13 @@ for ticker in allTickerList:
         sma10 = ind.sma(adjClose, 10)
         sma20 = ind.sma(adjClose, 20)
 
+        sma25 = ind.sma(adjClose, 25)
+        sma50 = ind.sma(adjClose, 50)
+        sma75 = ind.sma(adjClose, 75)
+        sma100 = ind.sma(adjClose, 100)
+        sma150 = ind.sma(adjClose, 150)
+        sma200 = ind.sma(adjClose, 200)
+
         buySignal = ind.list1_cross_list2(sma10, sma20)
         sellSignal = ind.list1_cross_list2(sma20, sma10)
 
@@ -59,12 +66,30 @@ for ticker in allTickerList:
                     iVal = i
                     buyDate = sqlDf.datetime[i]
                     buyPrice = sqlDf.adjClose[i]
+                    buyVolume = sqlDf.volume[i]
                     bought = True
+                    stopLoss = sqlDf.adjClose[i]*0.95
+
+                    sma25t0 = sma25[i]
+                    sma50t0 = sma50[i]
+                    sma75t0 = sma75[i]
+                    sma100t0 = sma100[i]
+                    sma150t0 = sma150[i]
+                    sma200t0 = sma200[i]
+                    if sqlDf.adjHigh[i] == sqlDf.adjLow[i]:
+                        candlePct = 1
+                    else:
+                        candlePct = (sqlDf.adjClose[i]-sqlDf.adjLow[i])/(sqlDf.adjHigh[i]-sqlDf.adjLow[i])
+
             else: #bought == True
                 #if data.iloc[i][sellLoc] == 1:
-                if sellSignal[i] == 1:
+                if sqlDf.adjLow[i] <= stopLoss or sellSignal[i] == 1:
                     sellDate = sqlDf.datetime[i]
-                    sellPrice = sqlDf.adjClose[i]
+                    if sqlDf.adjLow[i] <= stopLoss:
+                        sellPrice = min(sqlDf.adjOpen[i], stopLoss)
+                    else:
+                        sellPrice = sqlDf.adjClose[i]
+                    sellVolume = sqlDf.volume[i]
                     bought = False
 
                     daysHeld = i - iVal
@@ -75,11 +100,21 @@ for ticker in allTickerList:
                     dict1['symbol'] = ticker
                     dict1['buyDate'] = buyDate
                     dict1['buyPrice'] = buyPrice
+                    dict1['buyVolume'] = buyVolume
                     dict1['sellDate'] = sellDate
                     dict1['sellPrice'] = sellPrice
+                    dict1['sellVolume'] = sellVolume
                     dict1['daysHeld'] = daysHeld
                     dict1['gainLoss'] = gainLoss
                     dict1['tradeReturn'] = tradeReturn
+
+                    dict1['sma25t0'] = sma25t0
+                    dict1['sma50t0'] = sma50t0
+                    dict1['sma75t0'] = sma75t0
+                    dict1['sma100t0'] = sma100t0
+                    dict1['sma150t0'] = sma150t0
+                    dict1['sma200t0'] = sma200t0
+                    dict1['candlePct'] = candlePct
 
                     tradeResults = tradeResults.append(dict1, ignore_index=True)
 
